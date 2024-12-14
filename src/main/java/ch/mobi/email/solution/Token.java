@@ -1,4 +1,4 @@
-package ch.mobi.email;
+package ch.mobi.email.solution;
 
 public record Token(Type type, String value) {
 

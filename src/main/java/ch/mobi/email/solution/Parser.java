@@ -1,4 +1,6 @@
-package ch.mobi.email;
+package ch.mobi.email.solution;
+
+import java.util.ArrayList;
 
 public class Parser {
 
@@ -19,12 +21,14 @@ public class Parser {
     }
 
     private void check(Token.Type type) {
-        if (lookahead.type() == type)
+        if (lookahead.type() == type) {
             scan();
-        // TODO: Throw error
+        } else {
+            throw new InvalidEmailException("expected token: " + type + ", found: " + lookahead.type());
+        }
     }
 
-    public Email parse() {
+    public Email parse() throws InvalidEmailException {
 
         scan();
         var email = email();
@@ -40,14 +44,15 @@ public class Parser {
         return new Email(address, domain);
     }
 
-    private String address() {
+    private Email.Address address() {
 
-        var name = name();
+        var parts = new ArrayList<String>();
+        parts.add(name());
         if (Token.Type.PERIOD.equals(lookahead.type())) {
             check(Token.Type.PERIOD);
-            name += "." + name();
+            parts.add(name());
         }
-        return name;
+        return new Email.Address(parts);
     }
 
     private String name() {
@@ -56,15 +61,16 @@ public class Parser {
         return current.value();
     }
 
-    private String domain() {
+    private Email.Domain domain() {
 
-        var name = name();
+        var parts = new ArrayList<String>();
+        parts.add(name());
         check(Token.Type.PERIOD);
-        name += "." + name();
+        parts.add(name());
         while(Token.Type.PERIOD.equals(lookahead.type())) {
             check(Token.Type.PERIOD);
-            name += "." + name();
+            parts.add(name());
         }
-        return name;
+        return new Email.Domain(parts);
     }
 }
